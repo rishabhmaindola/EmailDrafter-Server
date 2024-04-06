@@ -5,7 +5,11 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+    origin: "https://email-drafter-gold.vercel.app/",
+    methods: ["POST", "GET", "PUT", "DELETE"]
+};
+app.use(cors(corsOptions));
 
 const port = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGODB_URI);
