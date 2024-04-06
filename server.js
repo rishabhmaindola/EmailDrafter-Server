@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 const corsOptions = {
-    origin: "https://email-drafter-gold.vercel.app/",
+    origin: "https://email-drafter-gold.vercel.app",
     methods: ["POST", "GET", "PUT", "DELETE"]
 };
 app.use(cors(corsOptions));
