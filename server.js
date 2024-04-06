@@ -21,4 +21,9 @@ app.use('/prompt', verifyToken, promptRoute);
 app.use('/scrape', verifyToken, scrapeRoute);
 app.use('/openai', aiRoute);
 
+
+app.get('/', (req, res) => {
+  res.send("SERVER IS LIVE");
+});
+
 app.listen(port, () => console.log(`Server is listening on ${port}`));
