@@ -1,24 +1,58 @@
 const express = require('express');
+const puppeteer = require('puppeteer');
+
 const router = express.Router();
-const scrapeWebsite = require('../scrapers/websiteScraper');
-const scrapeSitemap = require('../scrapers/aboutPageScraper');
+
+async function scrapeWebsite(url) {
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: true
+        });
+        
+        const page = await browser.newPage();
+
+        await page.setDefaultNavigationTimeout(60000);
+
+        await page.goto(url);
+
+        const bodyContent = await page.evaluate(() => document.body.innerText);
+
+        return bodyContent;
+    } catch (error) {
+        console.error('Error scraping website:', error);
+        return null;
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
+    }
+}
 
 router.post('/info', async (req, res) => {
     const { websiteUrl, aboutPageUrl } = req.body;
-    console.log(websiteUrl, aboutPageUrl);
+
+    // Input validation
+    if (!websiteUrl || !aboutPageUrl) {
+        return res.status(400).json({ error: 'Missing websiteUrl or aboutPageUrl in request body' });
+    }
+
     try {
         const [websiteInfo, aboutPageInfo] = await Promise.all([
             scrapeWebsite(websiteUrl),
-            scrapeSitemap(aboutPageUrl)
+            scrapeWebsite(aboutPageUrl)
         ]);
-        if (websiteInfo && aboutPageInfo) {
-            res.status(200).json({ website: websiteInfo, about: aboutPageInfo });
+        
+        // Check if both scraping operations were successful
+        if (websiteInfo !== null && aboutPageInfo !== null) {
+            return res.status(200).json({ website: websiteInfo, about: aboutPageInfo });
         } else {
-            res.status(400).json({ error: 'Failed to scrape website' });
+            return res.status(400).json({ error: 'Failed to scrape website' });
         }
     } catch (error) {
         console.error('Error handling request:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
