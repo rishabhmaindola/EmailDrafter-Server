@@ -13,9 +13,13 @@ async function scrapeWebsite(url) {
         
         const page = await browser.newPage();
 
-        await page.setDefaultNavigationTimeout(60000);
+        // Set a timeout for the page to load
+        await page.setDefaultNavigationTimeout(60000); // 60 seconds
 
         await page.goto(url);
+
+        // Wait for the body content to load
+        await page.waitForSelector('body');
 
         const bodyContent = await page.evaluate(() => document.body.innerText);
 
